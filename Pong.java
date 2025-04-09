@@ -15,6 +15,7 @@ public class Pong extends Application {
     private Random random = new Random();
 
     private Pane root;
+    private Scene gameScene;
 
     private final int swidth = 600;
     private final int xorigin = swidth/2;
@@ -33,13 +34,26 @@ public class Pong extends Application {
     private Shape ball;
 
     private int ballSpeedLim = 3;
-    private int ballSpeedfloor = 0;
+    private int ballSpeedfloor = 1;
     private boolean dirIsPositive = true;
 
     public static void main(String[] args) {launch(args);}
 
     @Override
     public  void start(Stage stage) {
+        initGameLeaves();
+
+        initGameBranches();
+
+        setupBall();
+
+        handleInputs();
+
+        stage.setScene(gameScene);
+        stage.show();       
+    }
+
+    private void initGameLeaves() {
         rightrec = makeRectangle(250, 0, 6, 100);
         leftrec = makeRectangle(-250, 0, 6, 100);
 
@@ -47,45 +61,44 @@ public class Pong extends Application {
         changeXDirection();
 
         top = new Rectangle(0, -3, swidth, 3);
-        bottom = new Rectangle(0, sheight+2, swidth, 3);
+        bottom = new Rectangle(0, sheight+3, swidth, 3);
         edgeL = new Rectangle(-3, 0, 3, sheight);
         edgeR = new Rectangle(swidth+3, 0, 3, sheight);
+    }
 
+    private void initGameBranches() {
         root = new Pane();
         root.getChildren().addAll(leftrec, rightrec, ball, top, bottom, edgeL, edgeR);
-        
-        Scene scene = new Scene(root, swidth, sheight);
+        gameScene = new Scene(root, swidth, sheight);
+    }
 
+    private void setupBall() {
         AnimationTimer timer = new AnimationTimer() {
             @Override
             public void handle(long now) {
                 ball.setTranslateX(ball.getTranslateX() + ballxtrans);
                 ball.setTranslateY(ball.getTranslateY() + ballytrans);
-                checkForSideCollision(leftrec, ball);
-                checkForSideCollision(rightrec, ball);
-                checkForTBCollision(top, ball);
-                checkForTBCollision(bottom, ball);
-                checkForEdgeCollision(edgeL, ball);
-                checkForEdgeCollision(edgeR, ball);
+                if (isCollision(ball, leftrec, rightrec)) changeXDirection();
+                if (isCollision(ball, top, bottom)) changeYDirection();
+                if (isCollision(ball, edgeL, edgeR)) System.exit(0);
             }
         };
 
         timer.start();
+    }
 
-        scene.setOnKeyPressed(event -> {
-            if (event.getCode() == KeyCode.UP) {
+    private void handleInputs() {
+        gameScene.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.UP && !isCollision(leftrec, top)) {
                 leftrec.setTranslateY(leftrec.getTranslateY()-10);
-            } else if (event.getCode() == KeyCode.DOWN) {
+            } else if (event.getCode() == KeyCode.DOWN && !isCollision(leftrec, bottom)) {
                 leftrec.setTranslateY(leftrec.getTranslateY()+10);
-            } else if (event.getCode() == KeyCode.LEFT) {
+            } else if (event.getCode() == KeyCode.LEFT && !isCollision(rightrec, top)) {
                 rightrec.setTranslateY(rightrec.getTranslateY()-10);
-            } else if (event.getCode() == KeyCode.RIGHT) {
+            } else if (event.getCode() == KeyCode.RIGHT && !isCollision(rightrec, bottom)) {
                 rightrec.setTranslateY(rightrec.getTranslateY()+10);
             }
         });
-
-        stage.setScene(scene);
-        stage.show();       
     }
 
     public Rectangle makeRectangle(double posx, double posy, int width, int height) {
@@ -96,7 +109,7 @@ public class Pong extends Application {
 
     public void changeXDirection() {
         ballxtrans = random.nextInt(ballSpeedLim - ballSpeedfloor + 1) + ballSpeedfloor;
-        ballytrans = random.nextInt(ballSpeedLim - ballSpeedfloor + 1) + ballSpeedfloor;
+        ballytrans = random.nextInt(ballSpeedLim - ballSpeedfloor) + ballSpeedfloor;
         dirIsPositive = !dirIsPositive;
         if (!dirIsPositive) {
             ball.setLayoutX(ball.getLayoutX() - rightrec.getWidth()/2);
@@ -111,19 +124,33 @@ public class Pong extends Application {
         ballytrans = -ballytrans;
     }
 
-    private void checkForSideCollision(Shape shape1, Shape shape2) {
+    private boolean isCollision(Shape prime, Shape shape1) {
+        if (prime.getBoundsInParent().intersects(shape1.getBoundsInParent())) {
+            return true;
+        }
+        return false;
+    }
+
+    private boolean isCollision(Shape prime, Shape shape1, Shape shape2) {
+        if (prime.getBoundsInParent().intersects(shape1.getBoundsInParent()) || prime.getBoundsInParent().intersects(shape2.getBoundsInParent())) {
+            return true;
+        }
+        return false;
+    }
+
+    private void handleSideCollision(Shape shape1, Shape shape2) {
         if (shape1.getBoundsInParent().intersects(shape2.getBoundsInParent())) {
             changeXDirection();
         }
     }
 
-    private void checkForTBCollision(Shape shape1, Shape shape2) {
+    private void handleTBCollision(Shape shape1, Shape shape2) {
         if (shape1.getBoundsInParent().intersects(shape2.getBoundsInParent())) {
             changeYDirection();
         }
     }
 
-    private void checkForEdgeCollision(Shape shape1, Shape shape2) {
+    private void handleEdgeCollision(Shape shape1, Shape shape2) {
         if (shape1.getBoundsInParent().intersects(shape2.getBoundsInParent())) {
             System.exit(0);
         }
