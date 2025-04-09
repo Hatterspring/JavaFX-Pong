@@ -1,5 +1,6 @@
 import java.util.Random;
 
+import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
@@ -14,6 +15,7 @@ public class Pong extends Application {
     private Random random = new Random();
 
     private Pane root;
+
     private final int swidth = 600;
     private final int xorigin = swidth/2;
     private final int sheight = 500;
@@ -30,8 +32,8 @@ public class Pong extends Application {
     private Rectangle edgeR;
     private Shape ball;
 
-    private int ballSpeedLim = 10;
-    private int ballSpeedfloor = 5;
+    private int ballSpeedLim = 3;
+    private int ballSpeedfloor = 0;
     private boolean dirIsPositive = true;
 
     public static void main(String[] args) {launch(args);}
@@ -42,6 +44,7 @@ public class Pong extends Application {
         leftrec = makeRectangle(-250, 0, 6, 100);
 
         ball = new Circle(getPosx(0), getPosy(0), 6);
+        changeXDirection();
 
         top = new Rectangle(0, -3, swidth, 3);
         bottom = new Rectangle(0, sheight+2, swidth, 3);
@@ -50,22 +53,12 @@ public class Pong extends Application {
 
         root = new Pane();
         root.getChildren().addAll(leftrec, rightrec, ball, top, bottom, edgeL, edgeR);
-
-        changeXDirection();
         
         Scene scene = new Scene(root, swidth, sheight);
 
-        scene.setOnKeyPressed(event -> {
-            if (event.getCode() == KeyCode.UP) {
-                leftrec.setTranslateY(leftrec.getTranslateY()-5);
-            } else if (event.getCode() == KeyCode.DOWN) {
-                leftrec.setTranslateY(leftrec.getTranslateY()+5);
-            } else if (event.getCode() == KeyCode.LEFT) {
-                rightrec.setTranslateY(rightrec.getTranslateY()-5);
-            } else if (event.getCode() == KeyCode.RIGHT) {
-                rightrec.setTranslateY(rightrec.getTranslateY()+5);
-            }
-            if (event.getCode() == KeyCode.X) {
+        AnimationTimer timer = new AnimationTimer() {
+            @Override
+            public void handle(long now) {
                 ball.setTranslateX(ball.getTranslateX() + ballxtrans);
                 ball.setTranslateY(ball.getTranslateY() + ballytrans);
                 checkForSideCollision(leftrec, ball);
@@ -74,6 +67,20 @@ public class Pong extends Application {
                 checkForTBCollision(bottom, ball);
                 checkForEdgeCollision(edgeL, ball);
                 checkForEdgeCollision(edgeR, ball);
+            }
+        };
+
+        timer.start();
+
+        scene.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.UP) {
+                leftrec.setTranslateY(leftrec.getTranslateY()-10);
+            } else if (event.getCode() == KeyCode.DOWN) {
+                leftrec.setTranslateY(leftrec.getTranslateY()+10);
+            } else if (event.getCode() == KeyCode.LEFT) {
+                rightrec.setTranslateY(rightrec.getTranslateY()-10);
+            } else if (event.getCode() == KeyCode.RIGHT) {
+                rightrec.setTranslateY(rightrec.getTranslateY()+10);
             }
         });
 
@@ -89,7 +96,7 @@ public class Pong extends Application {
 
     public void changeXDirection() {
         ballxtrans = random.nextInt(ballSpeedLim - ballSpeedfloor + 1) + ballSpeedfloor;
-        ballytrans = random.nextInt((int)ballxtrans);
+        ballytrans = random.nextInt(ballSpeedLim - ballSpeedfloor + 1) + ballSpeedfloor;
         dirIsPositive = !dirIsPositive;
         if (!dirIsPositive) {
             ball.setLayoutX(ball.getLayoutX() - rightrec.getWidth()/2);
