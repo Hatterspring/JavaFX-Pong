@@ -45,10 +45,14 @@ public class Pong extends Application {
     private Rectangle edgeL;
     private Rectangle edgeR;
     private Circle ball;
+    private Text scoreboard;
 
     private int ballSpeedLim = 3;
     private int ballSpeedfloor = 1;
     private boolean dirIsPositive = true;
+
+    private int score = 0;
+    private int highScore = 0;
 
     private Text resetText;
     private Button resetButton;
@@ -106,10 +110,16 @@ public class Pong extends Application {
         bottom = new Rectangle(0, sheight+3, swidth, 3);
         edgeL = new Rectangle(-3, 0, 3, sheight);
         edgeR = new Rectangle(swidth+3, 0, 3, sheight);
+
+        scoreboard = new Text("SCORE: " + Integer.toString(score));
+        scoreboard.setScaleX(3);
+        scoreboard.setScaleY(3);
+        scoreboard.setLayoutX(xorigin - scoreboard.getBoundsInLocal().getWidth()/2);
+        scoreboard.setLayoutY(20);
     }
 
     private void initGameBranches() {
-        root.getChildren().addAll(leftrec, rightrec, ball, top, bottom, edgeL, edgeR);
+        root.getChildren().addAll(leftrec, rightrec, ball, top, bottom, edgeL, edgeR, scoreboard);
         gameScene = new Scene(root, swidth, sheight);
     }
 
@@ -119,9 +129,13 @@ public class Pong extends Application {
             public void handle(long now) {
                 ball.setTranslateX(ball.getTranslateX() + ballxtrans);
                 ball.setTranslateY(ball.getTranslateY() + ballytrans);
-                if (isCollision(ball, leftrec, rightrec)) changeXDirection();
+                if (isCollision(ball, leftrec, rightrec)) {
+                    incrementScore();
+                    changeXDirection();
+                }
                 if (isCollision(ball, top, bottom)) changeYDirection();
                 if (isCollision(ball, edgeL, edgeR)) {
+                    updateResetScore();
                     stage.setScene(resetScene);
                 }
             }
@@ -165,6 +179,14 @@ public class Pong extends Application {
         ballytrans = -ballytrans;
     }
 
+    private void incrementScore() {
+        score++;
+        if (highScore < score) {
+            highScore = score;
+        }
+        scoreboard.setText("SCORE: " + Integer.toString(score));
+    }
+
     private boolean isCollision(Shape prime, Shape shape1) {
         if (prime.getBoundsInParent().intersects(shape1.getBoundsInParent())) {
             return true;
@@ -189,6 +211,8 @@ public class Pong extends Application {
         ball.setTranslateY(0);
         ball.setLayoutX(0);
         ball.setLayoutY(0);
+
+        score = 0;
     }
 
     public double getPosx(double val) {
@@ -200,14 +224,14 @@ public class Pong extends Application {
     }
 
     private void initResetLeaves() {
-        resetText = new Text("You failed! Try again?");
+        resetText = new Text("You failed!\nScore: " + score + "\nHigh score: "+ highScore + "\nTry again?");
         resetButton = new Button("Play again?");
         quitButton = new Button("Quit");
     }
 
     private void initResetBranches() {
-        reseth = new HBox(resetButton, quitButton);
-        resetv = new VBox(resetText, reseth);
+        reseth = new HBox(20,resetButton, quitButton);
+        resetv = new VBox(20,resetText, reseth);
         resetScene = new Scene(resetv);
     }
 
@@ -220,5 +244,9 @@ public class Pong extends Application {
     private void handleResetButtons(Stage stage) {
         resetButton.setOnAction(event -> {timer.stop(); resetGame(); stage.setScene(gameScene); timer.start();});
         quitButton.setOnAction(event -> System.exit(0));
+    }
+
+    private void updateResetScore() {
+        resetText.setText("You failed!\nScore: " + score + "\nHigh score: "+ highScore + "\nTry again?");
     }
 }
