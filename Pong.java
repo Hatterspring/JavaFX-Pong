@@ -1,12 +1,11 @@
 import java.util.Random;
 
-import javax.swing.GroupLayout.Alignment;
-
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.input.KeyCode;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
@@ -24,6 +23,9 @@ public class Pong extends Application {
     private Scene menuScene;
     private VBox menuBox;
     private Scene gameScene;
+    private Scene resetScene;
+    private VBox resetv;
+    private HBox reseth;
 
     private final int swidth = 600;
     private final int xorigin = swidth/2;
@@ -48,6 +50,10 @@ public class Pong extends Application {
     private int ballSpeedfloor = 1;
     private boolean dirIsPositive = true;
 
+    private Text resetText;
+    private Button resetButton;
+    private Button quitButton;
+
     public static void main(String[] args) {launch(args);}
 
     @Override
@@ -56,13 +62,14 @@ public class Pong extends Application {
         menu(stage);
         stage.setScene(menuScene);
         stage.show();
-        handleMenuButton(stage);
-        game(stage);         
+        game(stage);  
+        resetMenu(stage);       
     }
 
     private void menu(Stage stage) {
         initMenuLeaves();
         initMenuBranch();
+        handleMenuButton(stage);
     }
 
     private void initMenuLeaves() {
@@ -77,7 +84,6 @@ public class Pong extends Application {
 
     private void handleMenuButton(Stage stage) {
         menuButton.setOnAction(event -> {stage.setScene(gameScene); timer.start(); changeXDirection();});
-        
     }
 
     private void game(Stage stage) {
@@ -116,11 +122,7 @@ public class Pong extends Application {
                 if (isCollision(ball, leftrec, rightrec)) changeXDirection();
                 if (isCollision(ball, top, bottom)) changeYDirection();
                 if (isCollision(ball, edgeL, edgeR)) {
-                    resetGame();
-                    menu(stage);
-                    stage.setScene(menuScene);
-                    menuText.setText("You failed! try again?");
-                    handleMenuButton(stage);
+                    stage.setScene(resetScene);
                 }
             }
         };
@@ -177,12 +179,12 @@ public class Pong extends Application {
         return false;
     }
 
-    private void resetGame() {
-        timer.stop();
+    private void resetGame() {     
         rightrec.setTranslateY(0);
         rightrec.setLayoutY(0);
         leftrec.setTranslateY(0);
         leftrec.setLayoutY(0);
+
         ball.setTranslateX(0);
         ball.setTranslateY(0);
         ball.setLayoutX(0);
@@ -195,5 +197,28 @@ public class Pong extends Application {
 
     public double getPosy(double val) {
         return yorigin - val;
+    }
+
+    private void initResetLeaves() {
+        resetText = new Text("You failed! Try again?");
+        resetButton = new Button("Play again?");
+        quitButton = new Button("Quit");
+    }
+
+    private void initResetBranches() {
+        reseth = new HBox(resetButton, quitButton);
+        resetv = new VBox(resetText, reseth);
+        resetScene = new Scene(resetv);
+    }
+
+    private void resetMenu(Stage stage) {
+        initResetLeaves();
+        initResetBranches();
+        handleResetButtons(stage);
+    }
+
+    private void handleResetButtons(Stage stage) {
+        resetButton.setOnAction(event -> {timer.stop(); resetGame(); stage.setScene(gameScene); timer.start();});
+        quitButton.setOnAction(event -> System.exit(0));
     }
 }
