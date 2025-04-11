@@ -1,5 +1,5 @@
-This is a simple pong game made by myself as a testing space for javaFX. Built in Java 8, it is designed to support future versions of java as well.
+This is a simple pong game created by Aeden Hastie as a testing space for javaFX. Built in Java 8, it is designed to support future versions of Java as well.
 
-Simply run the batch file corresponding to your OS, and the batch file will add the javaFX SDK to the jar file, meaning it can run on a more recent version of java.
+Simply run the batch file corresponding to your OS, and the batch file will add the javaFX SDK to the pong.jar file, meaning it can run on a more recent version of Java.
 
-This project also includes the javaFX SDK. I do not own the javaFX SDK in any way, and it is included purely for the purposes of compiling the .jar file on later versions. More information in SDKs/LICENSE and SDKs/README
+This project also includes the javaFX SDK. I do not own the javaFX SDK in any way, and it is included purely for the purposes of compiling the .jar file on later versions. More information in SDKs/LICENSE and SDKs/README.
