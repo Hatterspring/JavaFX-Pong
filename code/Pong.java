@@ -73,6 +73,7 @@ public class Pong extends Application {
     //score fields
     private int score = 0;
     private int highScore = 0;
+    private boolean newHighScore = false;
 
     //reset menu leaf nodes
     private Text resetText;
@@ -233,6 +234,7 @@ public class Pong extends Application {
         score++;
         if (highScore < score) {
             highScore = score;
+            newHighScore = true;
         }
         scoreboard.setText("SCORE: " + Integer.toString(score));
     }
@@ -281,7 +283,12 @@ public class Pong extends Application {
 
     //initialise the reset menu leaf nodes
     private void initResetLeaves() {
-        resetText = new Text("You failed!\nScore: " + score + "\nHigh score: "+ highScore + "\nTry again?");
+        if (newHighScore) {
+            resetText = new Text("New high score!!!\nScore: " + score + "\nHigh score: "+ highScore + "\nTry again?");
+            newHighScore = false;
+        } else {
+            resetText = new Text("No new high score \u2639\nScore: " + score + "\nHigh score: "+ highScore + "\nTry again?");
+        }
         resetButton = new Button("Play again?");
         quitButton = new Button("Quit");
     }
@@ -308,6 +315,11 @@ public class Pong extends Application {
 
     //update the reset menu's displayed scores.
     private void updateResetScore() {
-        resetText.setText("You failed!\nScore: " + score + "\nHigh score: "+ highScore + "\nTry again?");
+        if (newHighScore) {
+            resetText = new Text("New high score!!!\nScore: " + score + "\nHigh score: "+ highScore + "\nTry again?");
+            newHighScore = false;
+        } else {
+            resetText = new Text("No new high score \u2639\nScore: " + score + "\nHigh score: "+ highScore + "\nTry again?");
+        }
     }
 }
