@@ -16,6 +16,8 @@ import java.util.Random;
 
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.input.KeyCode;
@@ -73,7 +75,6 @@ public class Pong extends Application {
     //score fields
     private int score = 0;
     private int highScore = 0;
-    private boolean newHighScore = false;
 
     //reset menu leaf nodes
     private Text resetText;
@@ -175,7 +176,7 @@ public class Pong extends Application {
 
                 //collision detected between the ball and the left or right edge. End the game and display the reset menu.
                 if (isCollision(ball, edgeL, edgeR)) {
-                    updateResetScore();
+                    if (score < highScore || score + highScore == 0) resetText.setText("No new high score \u2639\nScore: " + score + "\nHigh score: "+ highScore + "\nTry again?");
                     stage.setScene(resetScene);
                 }
             }
@@ -234,7 +235,7 @@ public class Pong extends Application {
         score++;
         if (highScore < score) {
             highScore = score;
-            newHighScore = true;
+            resetText.setText("New high score!!!\nScore: " + score + "\nHigh score: "+ highScore + "\nTry again?");
         }
         scoreboard.setText("SCORE: " + Integer.toString(score));
     }
@@ -269,6 +270,7 @@ public class Pong extends Application {
 
         score = 0;
         scoreboard.setText("SCORE: " + Integer.toString(score));
+        resetText.setText("No new high score \u2639\nScore: " + score + "\nHigh score: "+ highScore + "\nTry again?");
     }
 
     //get an x position relative to the middle of the scene.
@@ -283,12 +285,7 @@ public class Pong extends Application {
 
     //initialise the reset menu leaf nodes
     private void initResetLeaves() {
-        if (newHighScore) {
-            resetText = new Text("New high score!!!\nScore: " + score + "\nHigh score: "+ highScore + "\nTry again?");
-            newHighScore = false;
-        } else {
-            resetText = new Text("No new high score \u2639\nScore: " + score + "\nHigh score: "+ highScore + "\nTry again?");
-        }
+        resetText = new Text();
         resetButton = new Button("Play again?");
         quitButton = new Button("Quit");
     }
@@ -311,15 +308,5 @@ public class Pong extends Application {
     private void handleResetButtons(Stage stage) {
         resetButton.setOnAction(event -> {timer.stop(); resetGame(); stage.setScene(gameScene); timer.start();});
         quitButton.setOnAction(event -> System.exit(0));
-    }
-
-    //update the reset menu's displayed scores.
-    private void updateResetScore() {
-        if (newHighScore) {
-            resetText = new Text("New high score!!!\nScore: " + score + "\nHigh score: "+ highScore + "\nTry again?");
-            newHighScore = false;
-        } else {
-            resetText = new Text("No new high score \u2639\nScore: " + score + "\nHigh score: "+ highScore + "\nTry again?");
-        }
     }
 }
